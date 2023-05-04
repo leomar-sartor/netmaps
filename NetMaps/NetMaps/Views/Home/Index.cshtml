@@ -1,0 +1,142 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Primeiro Tutorial com LeafLet</h1>
+
+    <div id="map">
+
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    $(document).ready(function () {
+        console.log("Iniciou!");
+
+        //Meu Exemplo
+        //var map = L.map('map').setView([-26.737438, -52.739301], 14);
+
+        //L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            
+        //}).addTo(map);
+
+
+        //Sample 2
+        //var mymap = L.map('map').setView([51.505, -0.09], 13);
+        //        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //            maxZoom: 18,
+        //            attribution: 'Map data © OpenStreetMap contributors, ' +
+        //                'CC-BY-SA, ' +
+        //                'Imagery © Mapbox',
+        //            id: 'mapbox/streets-v11',
+        //            tileSize: 512,
+        //            zoomOffset: -1
+        //        }).addTo(mymap);
+
+
+        //Sample 3
+        //var cities = L.layerGroup();
+
+        //L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.').addTo(cities),
+        //L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.').addTo(cities),
+        //L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.').addTo(cities),
+        //L.marker([-26.737438, -52.739301]).bindPopup('This is Golden, CO.').addTo(cities);
+
+        //var mbAttr = 'Map data © OpenStreetMap contributors, ' + 'CC-BY-SA, ' + 'Imagery © Mapbox',  mbUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+
+        //var grayscale  = L.tileLayer(mbUrl, {id: 'mapbox/light-v9', tileSize: 512, 
+        //                zoomOffset: -1, attribution: mbAttr}),
+        //                streets  = L.tileLayer(mbUrl, {id: 'mapbox/streets-v11', tileSize: 512,
+        //                zoomOffset: -1, attribution: mbAttr});
+
+        //var layergroupcontrolmap = L.map('map', {
+        //    center: [39.73, -104.99], zoom: 10, layers: [streets, cities] 
+        //});
+
+        //var baseLayers = {
+        //    "Grayscale": grayscale,
+        //    "Streets": streets
+        //};
+
+        //var overlays = {
+        //    "Cities": cities
+        //};
+
+        //L.control.layers(baseLayers, overlays).addTo(layergroupcontrolmap);
+
+        //Sample 4
+        //var markermap = L.map('map').setView([51.505, -0.09], 13);
+
+        //L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        //    maxZoom: 18,
+        //    attribution: 'Map data © OpenStreetMap contributors, ' +
+        //        'CC-BY-SA, ' +
+        //        'Imagery © Mapbox',
+        //    id: 'mapbox/streets-v11',
+        //    tileSize: 512,
+        //    zoomOffset: -1
+        //}).addTo(markermap);
+
+        //L.marker([51.5, -0.09]).addTo(markermap);
+
+        //L.circle([51.508, -0.11], {
+        //    color: '#0ab39c',
+        //    fillColor: '#0ab39c',
+        //    fillOpacity: 0.5,
+        //    radius: 500
+        //}).addTo(markermap);
+
+        //L.polygon([
+        //    [51.509, -0.08],
+        //    [51.503, -0.06],
+        //    [51.51, -0.047]
+        //],{
+        //    color: '#405189',
+        //    fillColor: '#405189',
+        //}).addTo(markermap);
+
+        
+    var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib }),
+            map = new L.Map('map', { center: new L.LatLng(51.505, -0.04), zoom: 13 }),
+            drawnItems = L.featureGroup().addTo(map);
+
+        L.control.layers({
+            'osm': osm.addTo(map),
+            "google": L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
+                attribution: 'google'
+            })
+        },
+        { 'drawlayer': drawnItems },
+        { position: 'topleft', collapsed: false })
+        .addTo(map);
+
+        map.addControl(new L.Control.Draw({
+            edit: {
+                featureGroup: drawnItems,
+                poly: {
+                    allowIntersection: false
+                }
+            },
+            draw: {
+                polygon: {
+                    allowIntersection: false,
+                    showArea: true
+                }
+            }
+        }));
+
+        map.on(L.Draw.Event.CREATED, function (event) {
+            var layer = event.layer;
+
+            drawnItems.addLayer(layer);
+        });
+
+
+    });
+</script>
+}
