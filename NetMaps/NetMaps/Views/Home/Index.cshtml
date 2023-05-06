@@ -8,6 +8,15 @@
     <div id="map">
 
     </div>
+
+    <h4>Pontos geográficos</h4>
+
+    <button id="GetButton"> Pegar</button>
+    <button id="SetButton"> Setar</button>
+
+    <textarea id="coords" name="cordenadas" rows="4" cols="50">
+    </textarea>
+    
 </div>
 
 @section Scripts {
@@ -98,12 +107,20 @@
         //    fillColor: '#405189',
         //}).addTo(markermap);
 
-        
-    var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+        //ver
+        //https://tkrajina.github.io/leaflet-editable-polyline/example1.html
+        //https://tkrajina.github.io/leaflet-editable-polyline/example1.html
+        //https://jsfiddle.net/magi2109/x4wz9dL5/11/
+        //https://gis.stackexchange.com/questions/133379/how-to-export-to-all-points-within-leaflet-polygon
+        //https://github.com/tkrajina/leaflet-editable-polyline/
+
+        var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
             osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib }),
             map = new L.Map('map', { center: new L.LatLng(51.505, -0.04), zoom: 13 }),
             drawnItems = L.featureGroup().addTo(map);
+
+        
 
         L.control.layers({
             'osm': osm.addTo(map),
@@ -111,8 +128,13 @@
                 attribution: 'google'
             })
         },
-        { 'drawlayer': drawnItems },
-        { position: 'topleft', collapsed: false })
+        { 
+            'drawlayer': drawnItems 
+        },
+        { 
+            position: 'topleft',
+            collapsed: false 
+        })
         .addTo(map);
 
         map.addControl(new L.Control.Draw({
@@ -133,7 +155,22 @@
         map.on(L.Draw.Event.CREATED, function (event) {
             var layer = event.layer;
 
+            var cordinates = layer.getLatLngs();
+ 
+            console.log("Coordenadas: ", cordinates);
+
             drawnItems.addLayer(layer);
+        });
+
+        $("#GetButton").on("click", function(){
+            console.log("Buscando coordenadas!");
+
+            var polylines = L.map.getEditablePolylines();
+            console.log("polylines: ", polylines);
+        });
+
+        $("#SetButton").on("click", function(){
+            console.log("Setando coordenadas!");
         });
 
 
