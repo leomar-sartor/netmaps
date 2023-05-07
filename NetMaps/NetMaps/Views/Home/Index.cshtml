@@ -107,12 +107,19 @@
         //    fillColor: '#405189',
         //}).addTo(markermap);
 
+
+
+
+
+
+        //EXEMPLO FINAL
         //ver
         //https://tkrajina.github.io/leaflet-editable-polyline/example1.html
         //https://tkrajina.github.io/leaflet-editable-polyline/example1.html
         //https://jsfiddle.net/magi2109/x4wz9dL5/11/
         //https://gis.stackexchange.com/questions/133379/how-to-export-to-all-points-within-leaflet-polygon
         //https://github.com/tkrajina/leaflet-editable-polyline/
+        //https://gis.stackexchange.com/questions/331607/custom-functions-for-save-and-cancel-on-leaflet-draw-edit-control
 
         var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
             osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -120,7 +127,7 @@
             map = new L.Map('map', { center: new L.LatLng(51.505, -0.04), zoom: 13 }),
             drawnItems = L.featureGroup().addTo(map);
 
-        
+        var cordinates = undefined;
 
         L.control.layers({
             'osm': osm.addTo(map),
@@ -136,6 +143,24 @@
             collapsed: false 
         })
         .addTo(map);
+
+        L.marker([51.5, -0.09]).addTo(map);
+
+        L.circle([51.5, -0.11], {
+            color: '#0ab39c',
+            fillColor: '#0ab39c',
+            fillOpacity: 0.5,
+            radius: 500
+        }).addTo(map);
+
+        L.polygon([
+            [51.509, -0.08],
+            [51.503, -0.06],
+            [51.51, -0.047]
+        ],{
+            color: '#405189',
+            fillColor: '#405189',
+        }).addTo(map);
 
         map.addControl(new L.Control.Draw({
             edit: {
@@ -153,11 +178,16 @@
         }));
 
         map.on(L.Draw.Event.CREATED, function (event) {
+
             var layer = event.layer;
 
-            var cordinates = layer.getLatLngs();
- 
-            console.log("Coordenadas: ", cordinates);
+
+            let type = event.layerType;
+
+            if (type === 'polygon') {
+                cordinates = layer.getLatLngs();
+                console.log("Coordenadas: ", cordinates);
+            }
 
             drawnItems.addLayer(layer);
         });
@@ -165,13 +195,44 @@
         $("#GetButton").on("click", function(){
             console.log("Buscando coordenadas!");
 
-            var polylines = L.map.getEditablePolylines();
-            console.log("polylines: ", polylines);
+            console.log("Coordenadas: ", cordinates);
         });
 
         $("#SetButton").on("click", function(){
             console.log("Setando coordenadas!");
         });
+
+        map.on('draw:edited', function (e) {
+            console.log("SALVOU!");
+        });
+
+        map.on('draw:editstop', function (e) {
+            console.log("CANCELANDO!");
+        });
+
+       
+       map.on('draw:deletestart', function (e) {
+            console.log("clicou no botão de excluir!");
+        });
+
+        map.on('draw:deletestop', function (e) {
+            console.log("clicou em alguma ação do botão de excluir!!");
+        });
+            
+        map.on('draw:editcancel', function (e) {
+            console.log("draw:editcancel");
+        });
+        
+
+        //map.on('draw:edited', function (e) {
+        // var layers = e.layers;
+        // layers.eachLayer(function (layer) {
+        //     //do whatever you want; most likely save back to db
+        // });
+        //});
+        
+
+        
 
 
     });
