@@ -1,7 +1,19 @@
+using NetMaps;
+using NetMaps.Interfaces;
+using NetMaps.Repository;
+using NetMaps.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
+ContextoMongoDb.ConnectionString = builder.Configuration.GetSection("MongoConnection:ConnectionString").Value;
+ContextoMongoDb.DatabaseName = builder.Configuration.GetSection("MongoConnection:Database").Value;
+ContextoMongoDb.IsSSL = Convert.ToBoolean(builder.Configuration.GetSection("MongoConnection:IsSSL").Value);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.Configure<SettingsConfig>(builder.Configuration);
+builder.Services.AddScoped<IGasStationAppService, GasStationAppService>();
+builder.Services.AddScoped<IGasStationRepository, GasStationRepository>();
 
 var app = builder.Build();
 

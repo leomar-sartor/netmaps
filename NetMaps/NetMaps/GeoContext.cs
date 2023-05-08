@@ -20,13 +20,23 @@ namespace NetMaps
             CheckIndexContext();
         }
 
-        public IMongoCollection<Pontos> Pontos =>
-            _mongoDatabase.GetCollection<Pontos>("pontos");
+        public IMongoCollection<GasStation> GasStations =>
+            _mongoDatabase.GetCollection<GasStation>("GasStations");
 
         private void CheckIndexContext()
         {
-            IMongoCollection<Pontos> collection = _mongoDatabase.GetCollection<Pontos>("pontos");
-            collection.Indexes.CreateOne(new IndexKeysDefinitionBuilder<Pontos>().Geo2DSphere(x => x.Name));
+            IMongoCollection<GasStation> collection = _mongoDatabase.GetCollection<GasStation>("GasStations");
+
+            //var options = new CreateIndexOptions
+            //{
+            //    Unique = true,
+            //    Name = $"GasStations_Location"
+            //};
+
+            //var createdIndexName = collection.Indexes.CreateOne($"{{ {"GasStation"} : 1 }}");
+
+
+            collection.Indexes.CreateOne(new IndexKeysDefinitionBuilder<GasStation>().Geo2DSphere(x => x.Location));
         }
     }
 }
