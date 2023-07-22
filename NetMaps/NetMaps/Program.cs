@@ -3,6 +3,7 @@ using NetMaps.Interfaces;
 using NetMaps.Repository;
 using NetMaps.Services;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 ContextoMongoDb.ConnectionString = builder.Configuration.GetSection("MongoConnection:ConnectionString").Value;

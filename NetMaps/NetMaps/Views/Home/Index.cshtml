@@ -8,323 +8,119 @@
     <div id="map">
     </div>
 
-    <br />
-    <button id="GetButton"> Limpar </button>
-    <button id="SetButton"> Gravar </button>
-
-    @*<h4>Pontos geográficos</h4>
-    <textarea id="coords" name="cordenadas" rows="4" cols="50">
-    </textarea>*@
-
 </div>
 
 @section Scripts {
     <script>
         $(document).ready(function () {
-            var _latitudeAtual = 0;
-            var _longitudeAtual = 0;
 
-            //https://developer.mozilla.org/pt-BR/docs/Web/API/Geolocation_API
+            var cordinates = undefined;
+            var carregou = false;
+
+            var loadMaps = function(latitude, longitude){
+                console.log("loadMaps");
+                console.log("latitude", latitude);
+                console.log("longitude", longitude);
+
+                var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+                    osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">BR Serviços </a>',
+                    osm = L.tileLayer(osmUrl, { maxZoom: 20, attribution: osmAttrib }),
+                    map = new L.Map('map', {
+                        //minZoom:20,
+                        //maxZoom: 100,
+                        center: new L.LatLng(latitude, longitude),
+                        zoom: 15
+                    }),
+                    drawnItems = L.featureGroup().addTo(map);
+
+                L.control.layers({
+                    'Cartográfico': osm.addTo(map),
+                    //"Other": L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '<a href="http://www.esri.com/">Esri</a>', maxZoom: 18 },
+                    "Vegetação": L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', { attribution: 'google', maxZoom: 20 },
+                    )
+                    },
+                    {
+                        'Visualizar': drawnItems
+                    },
+                    {
+                        position: 'topright',
+                        collapsed: false
+                    })
+                    .addTo(map);
+
+                L.marker([latitude, longitude]).addTo(map);
+
+                L.polygon([
+                    [-26.73680420892953, -52.742064893245704],
+                    [-26.738227087915497, -52.740509212017066],
+                    [-26.73843788328836, -52.74073451757432],
+                    [-26.738639096688892, -52.741029560565956],
+                    [-26.73869658616652, -52.741131484508514],
+                    [-26.738734912468797, -52.74124413728715],
+                    [-26.738806774250737, -52.74137288331986],
+                    [-26.737436601787604, -52.742826640605934],
+                    [-26.737403065890994, -52.742553055286415],
+                    [-26.737168314337858, -52.74216145277024]
+                ], {
+                    color: '#405189',
+                    fillColor: '#405189',
+                }).addTo(map);
+
+                map.addControl(new L.Control.Draw({
+                    edit: {
+                        featureGroup: drawnItems,
+                        poly: {
+                            allowIntersection: false
+                        }
+                    },
+                    draw: {
+                        polygon: {
+                            allowIntersection: false,
+                            showArea: true
+                        },
+                        marker: true, //Ponto de Localização
+                        circlemarker: false, //Circulo de Localização
+                        circle: false, //Circulo de Localização
+                        rectangle: false, //Circulo de Localização
+                        polyline: false, //Circulo de Localização
+                    }
+                }));
+
+                map.on(L.Draw.Event.CREATED, function (event) {
+
+                    var layer = event.layer;
+
+
+                    let type = event.layerType;
+
+                    if (type === 'polygon') {
+                        cordinates = layer.getLatLngs();
+                        console.log("Coordenadas: ", cordinates);
+
+                        var area = L.GeometryUtil.geodesicArea(cordinates[0]);
+                        var readableArea = L.GeometryUtil.readableArea(area, true);
+                        console.log("Área: ", readableArea);
+                    }
+
+                    drawnItems.addLayer(layer);
+                });
+            };
+
             if ("geolocation" in navigator) {
-                //Para fazer algo com a posição Atual
-                //navigator.geolocation.getCurrentPosition(function(position) {
-                    //do_something(position.coords.latitude, position.coords.longitude);
-                //});
 
                 const watcher = navigator.geolocation.watchPosition(function(position){
                     console.log("Posição:", position);
-                    _latitudeAtual = position.coords.latitude;
-                    _longitudeAtual = position.coords.longitude;
-
+                    if (carregou === false){
+                        loadMaps(position.coords.latitude, position.coords.longitude);
+                        carregou = true;
+                    }
                 }, function(error){
                     console.log(error);
-                   //Alta precisão, Tempo máximo: 30 segundos, 
                 },{ enableHighAccuracy: true, maximumAge: 30000, timeout: 30000 });
 
-                //como se fosse um clear interval
-                //navigator.geolocation.clearWatch(watcher);
             } else {
                 alert("I'm sorry, but geolocation services are not supported by your browser.");
             }
-
-            console.log("Iniciou!");
-            console.log("_latitude: ", _latitudeAtual);
-            console.log("_longitude: ", _longitudeAtual);
-
-            setTimeout(function(){
-                console.log("Terminou de esperar");
-            
-
-            //Meu Exemplo
-            //var map = L.map('map').setView([-26.737438, -52.739301], 14);
-
-            //L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            //    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-
-            //}).addTo(map);
-
-
-            //Sample 2
-            //var mymap = L.map('map').setView([51.505, -0.09], 13);
-            //        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            //            maxZoom: 18,
-            //            attribution: 'Map data © OpenStreetMap contributors, ' +
-            //                'CC-BY-SA, ' +
-            //                'Imagery © Mapbox',
-            //            id: 'mapbox/streets-v11',
-            //            tileSize: 512,
-            //            zoomOffset: -1
-            //        }).addTo(mymap);
-
-
-            //Sample 3
-            //var cities = L.layerGroup();
-
-            //L.marker([39.61, -105.02]).bindPopup('This is Littleton, CO.').addTo(cities),
-            //L.marker([39.74, -104.99]).bindPopup('This is Denver, CO.').addTo(cities),
-            //L.marker([39.73, -104.8]).bindPopup('This is Aurora, CO.').addTo(cities),
-            //L.marker([-26.737438, -52.739301]).bindPopup('This is Golden, CO.').addTo(cities);
-
-            //var mbAttr = 'Map data © OpenStreetMap contributors, ' + 'CC-BY-SA, ' + 'Imagery © Mapbox',  mbUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-
-            //var grayscale  = L.tileLayer(mbUrl, {id: 'mapbox/light-v9', tileSize: 512,
-            //                zoomOffset: -1, attribution: mbAttr}),
-            //                streets  = L.tileLayer(mbUrl, {id: 'mapbox/streets-v11', tileSize: 512,
-            //                zoomOffset: -1, attribution: mbAttr});
-
-            //var layergroupcontrolmap = L.map('map', {
-            //    center: [39.73, -104.99], zoom: 10, layers: [streets, cities]
-            //});
-
-            //var baseLayers = {
-            //    "Grayscale": grayscale,
-            //    "Streets": streets
-            //};
-
-            //var overlays = {
-            //    "Cities": cities
-            //};
-
-            //L.control.layers(baseLayers, overlays).addTo(layergroupcontrolmap);
-
-            //Sample 4
-            //var markermap = L.map('map').setView([51.505, -0.09], 13);
-
-            //L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            //    maxZoom: 18,
-            //    attribution: 'Map data © OpenStreetMap contributors, ' +
-            //        'CC-BY-SA, ' +
-            //        'Imagery © Mapbox',
-            //    id: 'mapbox/streets-v11',
-            //    tileSize: 512,
-            //    zoomOffset: -1
-            //}).addTo(markermap);
-
-            //L.marker([51.5, -0.09]).addTo(markermap);
-
-            //L.circle([51.508, -0.11], {
-            //    color: '#0ab39c',
-            //    fillColor: '#0ab39c',
-            //    fillOpacity: 0.5,
-            //    radius: 500
-            //}).addTo(markermap);
-
-            //L.polygon([
-            //    [51.509, -0.08],
-            //    [51.503, -0.06],
-            //    [51.51, -0.047]
-            //],{
-            //    color: '#405189',
-            //    fillColor: '#405189',
-            //}).addTo(markermap);
-
-
-
-
-
-
-            //EXEMPLO FINAL
-            //ver
-            //https://tkrajina.github.io/leaflet-editable-polyline/example1.html
-            //https://jsfiddle.net/magi2109/x4wz9dL5/11/
-            //https://gis.stackexchange.com/questions/133379/how-to-export-to-all-points-within-leaflet-polygon
-            //https://github.com/tkrajina/leaflet-editable-polyline/
-            //https://gis.stackexchange.com/questions/331607/custom-functions-for-save-and-cancel-on-leaflet-draw-edit-control
-            //https://www.fernandoquadro.com.br/html/2019/04/02/introducao-ao-leaflet-coordenadas-parte-7/
-            //https://acervolima.com/leafletjs-interagindo-com-o-maps-usando-javascript/
-
-            var osmUrl = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                osmAttrib = '&copy; <a href="http://openstreetmap.org/copyright">BR Serviços </a>',
-                osm = L.tileLayer(osmUrl, { maxZoom: 18, attribution: osmAttrib }),
-                //map = new L.Map('map', { center: new L.LatLng(51.505, -0.04), zoom: 13 }),
-                //map = new L.Map('map', { center: new L.LatLng(-26.730874995535498, -52.718651007702924), zoom: 15 }),
-                map = new L.Map('map', { center: new L.LatLng(_latitudeAtual, _longitudeAtual), zoom: 15 }),
-                //-26.730874995535498, -52.718651007702924
-                drawnItems = L.featureGroup().addTo(map);
-
-            var cordinates = undefined;
-
-            L.control.layers({
-                'Cartográfico': osm.addTo(map),
-                "Vegetação": L.tileLayer('http://www.google.cn/maps/vt?lyrs=s@189&gl=cn&x={x}&y={y}&z={z}', {
-                    attribution: 'google'
-                })
-            },
-                {
-                    'Visualizar': drawnItems
-                },
-                {
-                    position: 'topright',
-                    collapsed: false
-                })
-                .addTo(map);
-
-            //L.marker([51.5, -0.09]).addTo(map);
-            //L.marker([-26.730874995535498, -52.718651007702924]).addTo(map);
-            L.marker([_latitudeAtual, _longitudeAtual]).addTo(map);
-
-            //L.circle([51.5, -0.11], {
-            //L.circle([-26.730874995535498, -52.718651007702924], {
-            //    color: '#0ab39c',
-            //    fillColor: '#0ab39c',
-            //    fillOpacity: 0.5,
-            //    radius: 500
-            //}).addTo(map);
-
-            //[51.509, -0.08],
-            //[51.503, -0.06],
-            //[51.51, -0.047]
-            L.polygon([
-                [-26.73680420892953, -52.742064893245704],
-                [-26.738227087915497, -52.740509212017066],
-                [-26.73843788328836, -52.74073451757432],
-                [-26.738639096688892, -52.741029560565956],
-                [-26.73869658616652, -52.741131484508514],
-                [-26.738734912468797, -52.74124413728715],
-                [-26.738806774250737, -52.74137288331986],
-                [-26.737436601787604, -52.742826640605934],
-                [-26.737403065890994, -52.742553055286415],
-                [-26.737168314337858, -52.74216145277024]
-            ], {
-                color: '#405189',
-                fillColor: '#405189',
-            }).addTo(map);
-
-            map.addControl(new L.Control.Draw({
-                edit: {
-                    featureGroup: drawnItems,
-                    poly: {
-                        allowIntersection: false
-                    }
-                },
-                draw: {
-                    polygon: {
-                        allowIntersection: false,
-                        showArea: true
-                    },
-                    marker: true, //Ponto de Localização
-                    circlemarker: false, //Circulo de Localização
-                    circle: false, //Circulo de Localização
-                    rectangle: false, //Circulo de Localização
-                    polyline: false, //Circulo de Localização
-                }
-            }));
-
-            map.on(L.Draw.Event.CREATED, function (event) {
-
-                var layer = event.layer;
-
-
-                let type = event.layerType;
-
-                if (type === 'polygon') {
-                    cordinates = layer.getLatLngs();
-                    console.log("Coordenadas: ", cordinates);
-                }
-
-                drawnItems.addLayer(layer);
-            });
-
-            $("#GetButton").on("click", function () {
-                console.log("Buscando coordenadas!");
-
-                console.log("Coordenadas: ", cordinates);
-            });
-
-            $("#SetButton").on("click", function () {
-                console.log("Setando coordenadas!");
-            });
-
-            //https://leaflet.github.io/Leaflet.draw/docs/leaflet-draw-latest.html
-            //CAIXA DE OPÇÕES
-            map.on('draw:toolbaropened', function (e) {
-                console.log("Caixa de opções ABRIU!");
-            });
-
-            map.on('draw:toolbarclosed', function (e) {
-                console.log("Caixa de opções FECHOU!");
-            });
-
-            map.on('draw:markercontext', function (e) {
-                console.log("Clicou com o botão Direito do Mouse!");
-            });
-
-            // DESENHANDO
-            map.on('draw:drawstart', function (e) {
-                console.log("Desenho INICIANDO!");
-            });
-
-            map.on('draw:drawvertex', function (e) {
-                console.log("Desenhou Vértice!");
-            });
-
-            map.on('draw:created', function (e) {
-                console.log("Desenho Criado!");
-            });
-
-            map.on('draw:drawstop', function (e) {
-                console.log("Desenho ENCERROU!");
-            });
-
-            //DESENHANDO - EDIÇÕES
-            map.on('draw:editstart', function (e) {
-                console.log("Desenho Iniciando Edição!");
-            });
-
-            map.on('draw:edited', function (e) {
-                console.log("(SALVAR) Desenho Salvou Edição!");
-            });
-
-            map.on('draw:editvertex', function (e) {
-                console.log("Editando Vértice!");
-            });
-
-            map.on('draw:editstop', function (e) {
-                console.log("(CANCELAR) Desenho Terminou Edição!");
-            });
-
-            map.on('draw:editmove', function (e) {
-                console.log("Desenhando - Movendo Objeto!");
-            });
-
-            map.on('draw:editresize', function (e) {
-                console.log("Desenhando - Mudando o Tamanho!");
-            });
-
-            //DESENHANDO - REMOVER
-            map.on('draw:deletestart', function (e) {
-                console.log("(BOTÃO REMOVER) Iniciando Remoção!");
-            });
-
-            map.on('draw:deletestop	', function (e) {
-                console.log("(BOTÃO REMOVER) Parando Remoção!");
-            });
-
-            map.on('draw:deleted', function (e) {
-                console.log("(BOTÃO REMOVER) Limpar Tudo!");
-            });
-
-            }, 3000);
         });
     </script>
 }
